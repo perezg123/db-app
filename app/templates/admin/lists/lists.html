@@ -1,0 +1,68 @@
+{% import "bootstrap/utils.html" as utils %}
+{% extends "base.html" %}
+{% block title %}Manage Lists{% endblock %}
+{% block body %}
+<div class="content-section">
+  <div class="outer">
+    <div class="middle">
+      <div class="inner">
+        <br/>
+        {{ utils.flashed_messages() }}
+        <br/>
+	<h1 style="text-align:center;">{{ title }}</h1>
+        {% if lists %}
+          <hr class="intro-divider">
+          <div class="center">
+            <table class="table table-striped table-bordered">
+              <thead>
+                <tr>
+                  <th> List ID </th>
+		  <th> List Name </th>
+		  <th class="text-center"> Item Count </th>
+		  <th> </th>
+		  <th> </th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for list in lists %}
+                <tr>
+		  <td> {{ list.id }} </td>
+                  <td> {{ list.listname }} </td>
+                  <td align="center">
+		  {% if list.items %}
+			{{ list.items.count() }}
+		  {% else %}
+			0
+		  {% endif %}
+		  </td>
+                  <td>
+                    <a href="{{ url_for('admin.list_items', id=list.id, listname=list.listname) }}">
+                      <span data-feather="edit-2"></span> Edit List 
+                    </a>
+                  </td>
+                  <td>
+                    <a href="{{ url_for('admin.delete_list', id=list.id) }}">
+                      <span data-feather="trash-2"></span> Delete 
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div style="text-align: center">
+        {% else %}
+          <div style="text-align: center">
+            <h3> No list items have been added. </h3>
+            <hr class="intro-divider">
+        {% endif %}
+          <a href="{{ url_for('admin.add_list') }}" class="btn btn-default btn-lg">
+            <i class="fa fa-plus"></i>
+            Add New List
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+
+    <title>{{ title }} | Security Integration</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/sticky-footer-navbar.css') }}" rel="stylesheet">
+  </head>
+
+  <body>
+  <div class="container-fluid">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+	  <a class="navbar-brand" href="#">PCM Security Integration</a>
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="btn btn-outline-secondary" href="{{ url_for('home.dashboard') }}" role="button">Home <span class="sr-only">(current)</span></a>
+      </li>
+      {% if current_user.is_admin %}
+      <li class="nav-item">
+	<div class="dropdown">
+	   <button type="button" class="btn btn-outline-secondary dropdown-toggle" id="admin" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Admin</button>
+	   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+		   <a class="dropdown-item" href="{{ url_for('admin.list_lists') }}">Lists</a>
+		   <a class="dropdown-item" href="{{ url_for('admin.list_contacts') }}">Contacts</a>	     
+		   <a class="dropdown-item" href="{{ url_for('admin.list_departments') }}">Departments</a>
+		   <a class="dropdown-item" href="{{ url_for('admin.list_roles') }}">Roles</a>
+		   <a class="dropdown-item" href="{{ url_for('admin.list_employees') }}">Employees</a>
+	      </div>
+	   </div>
+	{% endif %}
+      </li>
+      <li class="nav-item">
+	      <a class="btn btn-outline-secondary" href="{{ url_for('home.list_opportunities') }}" role="button">Opportunities</a>
+      </li>
+      <li class="nav-item">
+        <a class="btn btn-outline-secondary" href="{{ url_for('auth.logout') }}" role="button">Logout</a>
+      </li>
+    </ul>
+    <form action="#" method="post" class="form-inline my-2 my-lg-0">
+	    {% if current_user.is_authenticated %}
+	    	<a class="nav-link"><i class="fa fa-user"></i> Hi, {{ current_user.username }}
+	    {% endif %}
+      <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+  </nav>
+</div>
+
+{% block body %}
+
+{% endblock %}
+<!--
+	<footer class="footer">
+		<div class="container"><span class="text-muted">Copyright &copy; 2018. All Rights Reserved</span>
+		</div>
+	</footer>
+-->
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="{{ url_for('static', filename='js/jquery-slim.min.js') }}"><\/script>')</script>
+    <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+    <script>
+      feather.replace()
+    </script>
+
+    <!-- Graphs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+    <script>
+      var ctx = document.getElementById("myChart");
+      var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+          datasets: [{
+            data: [15339, 21345, 18483, 24003, 23489, 24092, 12034],
+            lineTension: 0,
+            backgroundColor: 'transparent',
+            borderColor: '#007bff',
+            borderWidth: 4,
+            pointBackgroundColor: '#007bff'
+          }]
+        },
+        options: {
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero: false
+              }
+            }]
+          },
+          legend: {
+            display: false,
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
