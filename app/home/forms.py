@@ -11,10 +11,10 @@ def _required(form, field):
         raise ValidationError('Field is required!')
 
 def oppstatus():
-    return ListItems.query.filter_by(listindex_id=18)
+    return ListItems.query.filter_by(listindex_id=19)
 
 def opptype():
-    return ListItems.query.filter_by(listindex_id=19)
+    return ListItems.query.filter_by(listindex_id=18)
 
 def regions():
     return ListItems.query.filter_by(listindex_id=17)
@@ -38,7 +38,7 @@ class OpportunityForm(FlaskForm):
     vendor = SelectField('Product Vendor', choices=[(1, 'Cisco'), (2, 'Palo Alto'), (3, 'Fortinet'), (4, 'Symantec'), (5, 'McAfee'), (6, 'Sophos'), (7, 'Other')], validators=[DataRequired()])
     product = StringField('Security Product', validators=[DataRequired()])
     description = TextAreaField('Description')
-    submit = SubmitField('Add Opportunity')
+#    submit = SubmitField('Add Opportunity')
 
 class ImplementationForm(FlaskForm):
     """

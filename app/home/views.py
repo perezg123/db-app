@@ -36,22 +36,21 @@ def add_opportunity():
     add_opportunity = True
     form = OpportunityForm()
     print(request.values.get('opptype'), flush=True)
-    if form.validate_on_submit():
-        abort(403)
-        opptype = format(form.opptype.data)
+    if request.method == 'POST':
+        opptype = request.values.get('opptype')
         now = datetime.now()
-        opportunities = Opportunity(opptype=form.opptype.data, status=form.status.data, 
-                createdate=now, region=form.region.data, 
-                ae=form.ae.data, sa=form.sa.data, am=form.asm.data, 
-                customername=form.customername.data, 
-                vendor=form.vendor.data, product=form.product.data, 
-                description=form.description.data) 
+        opportunities = Opportunity(opptype=opptype, status=request.values.get('status'),
+                createdate=now, region=request.values.get('region'),
+                ae=request.values.get('ae'), sa=request.values.get('sa'), am=request.values.get('am'),
+                customername=request.values.get('customername'),
+                vendor=request.values.get('vendor'), product=request.values.get('product'),
+                description=request.values.get('description'))
         try:
             # add opportunity to the database
             db.session.execute(opportunities)
             db.session.commit()
             oppid = opportunities.lastrowid
-            if opptype == 1:
+            if opptype == 16:
                 try:
                     implementation = Implementation(oppid, 
                             description=form.description.data, opp_status=form.status.data)

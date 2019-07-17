@@ -105,7 +105,7 @@ class Opportunity(db.Model):
     product=db.Column(db.Integer)
     description=db.Column(db.String(200))
     provider=db.Column(db.Integer)
-    implementations = db.relationship('Implementation', backref='opportunity_id', lazy='dynamic')
+    implementations = db.relationship('Implementation', back_populates='opportunity')
                                                                 
     def __repr__(self):
         return '<Opportunity: {}>'.format(self.name)
@@ -117,6 +117,7 @@ class Implementation(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     oppid = db.Column(db.Integer, db.ForeignKey('opportunities.oppid'))
+    opportunity = db.relationship('Opportunities', back_populates('implementation'))
     description = db.Column(db.String(120))
     provider = db.Column(db.Integer)
     req_sent_date = db.Column(db.DateTime, index=True)
