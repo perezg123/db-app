@@ -1,8 +1,9 @@
 import flask
-from flask import request, flash, redirect, render_template, url_for
+from flask import request, flash, redirect, render_template, url_for, abort
 from flask_login import current_user, login_required
-from .forms import AddOppForm, EditOppForm, OpportunityForm
+from .forms import OpportunityForm, ImplementationForm, oppstatus, opptype, regions, vendors
 from datetime import datetime
+from sqlalchemy.exc import SQLAlchemyError
 
 from . import home
 from .. import db
@@ -15,6 +16,17 @@ def check_admin():
     if not current_user.is_admin:
         abort(403)
 
+
+def flash_errors(form):
+    """Flashes form errors"""
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(u"Error in the %s field - %s" % (
+                getattr(form, field).label.text,
+                error
+            ), 'error')
+
+
 @home.route('/opportunities', methods=['GET', 'POST'])
 @login_required
 def list_opportunities():
@@ -22,9 +34,17 @@ def list_opportunities():
     List all opportunities
     """
     check_admin()
-    opportunities = Opportunity.query.all()                    
-    return render_template('home/opportunities/opportunities.html',
+#    opportunities = Opportunity.query.all()
+    qry = 'Select opportunities.oppid, b.name as opptype, a.name as status, c.name as region, ' \
+          'createdate, ae, sa, am, customername, d.name as vendor, product, provider, description ' \
+          'from opportunities inner join listitems as b on opportunities.opptype = b.id ' \
+          'inner join listitems as a on opportunities.status = a.id ' \
+          'inner join listitems as c on opportunities.region = c.id ' \
+          'inner join listitems as d on opportunities.vendor = d.id'
+    opportunities = db.session.execute(qry)
+    return render_template('/home/opportunities/opportunities.html',
                         opportunities=opportunities, title="Opportunities")
+
 
 @home.route('/opportunities/add/', methods=['GET', 'POST'])
 @login_required
@@ -35,44 +55,45 @@ def add_opportunity():
     check_admin()
     add_opportunity = True
     form = OpportunityForm()
-    print(request.values.get('opptype'), flush=True)
-    if request.method == 'POST':
+    if form.validate_on_submit():
+        print (form.opptype.data)
         opptype = request.values.get('opptype')
+        status = request.values.get('status')
+        region = request.values.get('region')
+        ae = request.values.get('ae')
+        sa = request.values.get('sa')
+        am = request.values.get('am')
+        customername = request.values.get('customername')
+        vendor = request.values.get('vendor')
+        product = request.values.get('product')
+        description = request.values.get('description')
         now = datetime.now()
-        opportunities = Opportunity(opptype=opptype, status=request.values.get('status'),
-                createdate=now, region=request.values.get('region'),
-                ae=request.values.get('ae'), sa=request.values.get('sa'), am=request.values.get('am'),
-                customername=request.values.get('customername'),
-                vendor=request.values.get('vendor'), product=request.values.get('product'),
-                description=request.values.get('description'))
+        opportunity = Opportunity(oppid=None, opptype=opptype, status=status, createdate=now, region=region,
+                                  ae=ae, sa=sa, am=am, customername=customername, vendor=vendor, product=product,
+                                  description=description, provider=0)
+
         try:
             # add opportunity to the database
-            db.session.execute(opportunities)
+            db.session.add(opportunity)
             db.session.commit()
-            oppid = opportunities.lastrowid
-            if opptype == 16:
-                try:
-                    implementation = Implementation(oppid, 
-                            description=form.description.data, opp_status=form.status.data)
-                    db.session.add(implementation)
-                    db.session.commit()
-                    flash('Opportunity Created. Please add implementation details.')
-                    return redirect(url_for('home.opportunities.add_implementation'),oppid=oppid)
-                except:
-                    flash('Error: the opportunity details could not be added.')
+            oppid = opportunity.oppid
+            if request.values.get('opptype') == '16':
+                return redirect(url_for('home.add_implementation', id=oppid))
 
-        except:
-            # in case opportunity name already exists
-            flash('Error: unable to add or opportunity name already exists.')
-
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            flash(error)
             # redirect to opportunities page
             return redirect(url_for('home.list_opportunities'))
 
+    flash_errors(form)
     # load opportunity template
+    print form.errors.items()
     form=OpportunityForm()
     
     return render_template('home/opportunities/opportunity.html', action="Add",
             add_opportunity=add_opportunity, form=form, title="Add opportunity")
+
 
 @home.route('/opportunities/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -100,6 +121,7 @@ def edit_opportunity(id):
     return render_template('home/opportunities/opportunity.html', action="Edit",
                 add_opportunity=add_opportunity, form=form, opportunity=opportunity, title="Edit opportunity")
 
+
 @home.route('/opportunities/delete/<int:id>', methods=['GET', 'POST'])
 @login_required
 def delete_opportunity(id):
@@ -115,7 +137,6 @@ def delete_opportunity(id):
     # redirect to the opportunities page
     return redirect(url_for('home.list_opportunities'))
 
-    return render_template(title="Delete opportunity")
 
 @home.route('/opportunities/implementation/add/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -124,25 +145,50 @@ def add_implementation(id):
     Insert a new implementation opp with base opp id
     """
     check_admin()
+    implementation = Implementation.query.get(id)
+    form=ImplementationForm(obj=implementation)
     if form.validate_on_submit():
-        implementation = Implementation.query.get(id)
-    else:
-        return render_template(title="Implementation Opportunity")
+        try:
+            implementation = Implementation(oppid=oppid,
+                                            description=request.values.get('description'),
+                                            opp_status=request.values.get('status'))
+            db.session.add(implementation)
+            db.session.commit()
+            flash('Implementation Created.')
+            return render_template('home/opportunities/implementations.html',
+                                   add_implementation=False, form=form, title="Implementations")
+        except:
+            print form.errors.items()
+            flash_errors()
+            flash('Error: details could not be created.')
 
-    return render_template(form='ImplementationForm', title="Implementation Details", 
-                            data=implementation, id=id)
+    return render_template('home/opportunities/implementation.html', form=form,
+                           title="Implementation Details", data=implementation, id=id)
+
+@home.route('/opportunities/implementations/', methods=['GET', 'POST'])
+@login_required
+def list_implementations():
+    """
+    List all implementations
+    """
+    check_admin()
+    form=ImplementationForm()
+    implementations = Implementation.query.all()
+    return render_template('home/opportunities/implementations.html', form=form,
+                           title="Implementations", data=implementations)
+
 
 @home.route('/dashboard')
 @login_required
 def dashboard():
-        data = db.session.execute("select * from opportunities")
+    data = db.session.execute("select * from opportunities")
             
-        if data is None:
-            return "There are no current opportunities."
-        else:
-            """
-            Render the dashboard template on the /dashboard route
-            """
-            return render_template('home/dashboard.html', title="Dashboard", data=data)
+    if data is None:
+        return "There are no current opportunities."
+    else:
+        """
+        Render the dashboard template on the /dashboard route
+        """
+        return render_template('home/opportunities/opportunities.html', title="Opportunities", data=data)
 
 
