@@ -19,6 +19,9 @@ def opptype():
 def regions():
     return ListItems.query.filter_by(listindex_id=17)
 
+def vendors():
+    return ListItems.query.filter_by(listindex_id=20)
+
 class ListsForm(FlaskForm):
     list_name = SelectField('List Name')
     submit = SubmitField('Edit')
@@ -28,22 +31,23 @@ class OpportunityForm(FlaskForm):
     Form to add or edit an opportunity
     """
     oppid = HiddenField()
-    status = QuerySelectField('Status', query_factory=oppstatus, get_label='itemname', validators=[DataRequired()])
-    opptype = QuerySelectField('Opportunity Type', query_factory=opptype, get_label='itemname', validators=[DataRequired()])
+    status = QuerySelectField('Status', query_factory=oppstatus, get_label='name', validators=[DataRequired()])
+    opptype = QuerySelectField('Opportunity Type', query_factory=opptype, get_label='name', validators=[DataRequired()])
     customername = StringField('Customer', validators=[DataRequired()])
-    region = QuerySelectField('Sales Region', query_factory=regions, get_label='itemname',  validators=[DataRequired()])
+    region = QuerySelectField('Sales Region', query_factory=regions, get_label='name',  validators=[DataRequired()])
     ae = StringField('Account Exec', validators=[DataRequired()])
     sa = StringField('Solutions Architect', validators=[DataRequired()])
-    asm = StringField('Area Security Manager', validators=[DataRequired()])
-    vendor = SelectField('Product Vendor', choices=[(1, 'Cisco'), (2, 'Palo Alto'), (3, 'Fortinet'), (4, 'Symantec'), (5, 'McAfee'), (6, 'Sophos'), (7, 'Other')], validators=[DataRequired()])
+    am = StringField('Area Security Manager', validators=[DataRequired()])
+    vendor = QuerySelectField('Product Vendor', query_factory=vendors, get_label='name',  validators=[DataRequired()])
     product = StringField('Security Product', validators=[DataRequired()])
     description = TextAreaField('Description')
-#    submit = SubmitField('Add Opportunity')
+    submit = SubmitField('Add Opportunity')
 
 class ImplementationForm(FlaskForm):
     """
     Form for implementations
     """
+    oppid = HiddenField()
     description = TextAreaField('Description')
     provider = StringField('Service Provider', validators=[DataRequired()])
     req_sent_date = DateTimeField('Request Sent')

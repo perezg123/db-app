@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | Implementation{% endblock %}
+{% block body %}
+
+<div class="col">
+
+<!-- <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4"> -->
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+	<h1 class="h2">Implementation Dashboard</h1>
+	<div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{{ url_for('home.add_opportunity') }}" class="btn btn-sm btn-primary" role="button" aria-pressed="true">Add</a>
+        <a href="{{ url_for('home.list_opportunities') }}" class="btn btn-sm btn-secondary" role="button">Refresh</a>
+	</div>
+</div>
+
+    <div class="table-responsive">
+	  {% if implementations %}
+            <table class="table table-striped table-sm">
+              <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Status</th>
+                    <th>Description</th>
+                    <th>Provider</th>
+                    <th>Req Sub</th>
+                    <th>Req Resp</th>
+                    <th>Scoping Call</th>
+		            <th>Scoping Complete</th>
+		            <th>3PP SoW</th>
+		            <th>3PP Sub</th>
+		            <th>PCM Paper</th>
+		            <th>Approval 1</th>
+                    <th>Approval 2</th>
+                    <th>SoW Reviewed</th>
+                    <th>SoW to Cust</th>
+                    <th>Cust Approved</th>
+                    <th>Closed</th>
+                </tr>
+                </thead>
+                <tbody>
+    		{% for implementation in implementations %}
+        	    <tr>
+            		<td>{{ implementation.oppid }}</td>
+			        <td>{{ implementation.opp_status }}</td>
+			        <td>{{ implementation.description }}</td>
+			        <td>{{ implementation.provider }}</td>
+			        <td>{{ implementation.req_sent_date }}</td>
+			        <td>{{ implementation.req_resp_date }}</td>
+			        <td>{{ implementation.scopingcall_sched_date }}</td>
+			        <td>{{ implementation.scopingcall_comp_date }}</td>
+			        <td>{{ implementation.tpp_sow_received_date }}</td>
+                    <td>{{ implementation.tpp_submit_date }}</td>
+                    <td>{{ implementation.pp_complete_date }}</td>
+                    <td>{{ implementation.approval1_date }}</td>
+                    <td>{{ implementation.approval2_date }}</td>
+                    <td>{{ implementation.sow_reviewed_date }}</td>
+                    <td>{{ implementation.sow_to_cust_date }}</td>
+                    <td>{{ implementation.cust_approved_date }}</td>
+                    <td>{{ implementation.date_closed }}</td>
+			        <td><a href="{{ url_for('home.edit_implementation', id=implementation.id) }}">
+			        <span data-feather="trash-2"></span> Edit </a></td>
+			        <td><a href="{{ url_for('home.delete_implementation', id=implementation.id) }}"><span data-feather="edit-2"></span>Delete</a></td>
+        	    </tr>
+	      {% endfor %}
+                </tbody>
+                </table>
+	    {% else %}
+	            <h3> No implemntations have been added. Please create an opportunity. </h3>
+	    {% endif %}
+          </div>
+<!--        </main> -->
+     </div>
+
+{% endblock %}
+

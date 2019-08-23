@@ -1,6 +1,7 @@
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from sqlalchemy.orm import relationship, backref
 
 from app import db, login_manager
 
@@ -105,7 +106,7 @@ class Opportunity(db.Model):
     product=db.Column(db.Integer)
     description=db.Column(db.String(200))
     provider=db.Column(db.Integer)
-    implementations = db.relationship('Implementation', back_populates='opportunity')
+    implementations = db.relationship('Implementation', backref='opportunities')
                                                                 
     def __repr__(self):
         return '<Opportunity: {}>'.format(self.name)
@@ -117,7 +118,6 @@ class Implementation(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     oppid = db.Column(db.Integer, db.ForeignKey('opportunities.oppid'))
-    opportunity = db.relationship('Opportunities', back_populates('implementation'))
     description = db.Column(db.String(120))
     provider = db.Column(db.Integer)
     req_sent_date = db.Column(db.DateTime, index=True)
@@ -161,7 +161,7 @@ class ListItems(db.Model):
     
     id=db.Column(db.Integer,primary_key=True)
     listindex_id=db.Column(db.Integer, db.ForeignKey('listindex.id'))
-    itemname=db.Column(db.String(60))
+    name=db.Column(db.String(60))
     itemdescr=db.Column(db.String(60))
     itemindex=db.Column(db.Integer)
 

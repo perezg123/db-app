@@ -88,7 +88,6 @@ def add_opportunity():
 
     flash_errors(form)
     # load opportunity template
-    print form.errors.items()
     form=OpportunityForm()
     
     return render_template('home/opportunities/opportunity.html', action="Add",
@@ -137,34 +136,6 @@ def delete_opportunity(id):
     # redirect to the opportunities page
     return redirect(url_for('home.list_opportunities'))
 
-
-@home.route('/opportunities/implementation/add/<int:id>', methods=['GET', 'POST'])
-@login_required
-def add_implementation(id):
-    """
-    Insert a new implementation opp with base opp id
-    """
-    check_admin()
-    implementation = Implementation.query.get(id)
-    form=ImplementationForm(obj=implementation)
-    if form.validate_on_submit():
-        try:
-            implementation = Implementation(oppid=oppid,
-                                            description=request.values.get('description'),
-                                            opp_status=request.values.get('status'))
-            db.session.add(implementation)
-            db.session.commit()
-            flash('Implementation Created.')
-            return render_template('home/opportunities/implementations.html',
-                                   add_implementation=False, form=form, title="Implementations")
-        except:
-            print form.errors.items()
-            flash_errors()
-            flash('Error: details could not be created.')
-
-    return render_template('home/opportunities/implementation.html', form=form,
-                           title="Implementation Details", data=implementation, id=id)
-
 @home.route('/opportunities/implementations/', methods=['GET', 'POST'])
 @login_required
 def list_implementations():
@@ -175,8 +146,140 @@ def list_implementations():
     form=ImplementationForm()
     implementations = Implementation.query.all()
     return render_template('home/opportunities/implementations.html', form=form,
-                           title="Implementations", data=implementations)
+                           title="Implementations", implementations=implementations)
 
+
+@home.route('/opportunities/implementation/add/<int:id>', methods=['GET', 'POST'])
+@login_required
+def add_implementation(id):
+    """
+    Insert a new implementation opp with base opp id
+    """
+    check_admin()
+    implementation = Implementation.query.get(id)
+    form=ImplementationForm(obj=implementation)
+    if form.is_submitted():
+        if len(request.values.get('req_sent_date')) <= 0:
+            req_sent_date = None
+        else:
+            req_sent_date = request.values.get('req_sent_date')
+        if len(request.values.get('req_resp_date')) <= 0:
+            req_resp_date = None
+        else:
+            req_resp_date = request.values.get('req_resp_date')
+        if len(request.values.get('scopingcall_sched_date')) <= 0:
+            scopingcall_sched_date = None
+        else:
+            scopingcall_sched_date = request.values.get('scopingcall_sched_date')
+        if len(request.values.get('scopingcall_comp_date')) <= 0:
+            scopingcall_comp_date = None
+        else:
+            scopingcall_comp_date = request.values.get('scopingcall_comp_date')
+        if len(request.values.get('tpp_sow_received_date')) <= 0:
+            tpp_sow_received_date = None
+        else:
+            tpp_sow_received_date = request.values.get('tpp_sow_received_date')
+        if len(request.values.get('tpp_submit_date')) <= 0:
+            tpp_submit_date = None
+        else:
+            tpp_submit_date = request.values.get('tpp_submit_date')
+        if len(request.values.get('pp_complete_date')) <= 0:
+            pp_complete_date = None
+        else:
+            pp_complete_date = request.values.get('pp_complete_date')
+        if len(request.values.get('approval1_date')) <= 0:
+            approval1_date = None
+        else:
+            approval1_date = request.values.get('approval1_date')
+        if len(request.values.get('approval2_date')) <= 0:
+            approval2_date = None
+        else:
+            approval2_date = request.values.get('approval2_date')
+        if len(request.values.get('sow_reviewed_date')) <= 0:
+            sow_reviewed_date = None
+        else:
+            sow_reviewed_date = request.values.get('sow_reviewed_date')
+        if len(request.values.get('sow_to_cust_date')) <= 0:
+            sow_to_cust_date = None
+        else:
+            sow_to_cust_date = request.values.get('sow_to_cust_date')
+        if len(request.values.get('cust_approved_date')) <= 0:
+            cust_approved_date = None
+        else:
+            cust_approved_date = request.values.get('cust_approved_date')
+ #   if form.validate_on_submit():
+
+        try:
+            implementation = Implementation(oppid=id,
+                                            description=request.values.get('description'),
+                                            opp_status=request.values.get('status'), provider=request.values.get('provider'),
+                                            req_sent_date = req_sent_date, req_resp_date = req_resp_date,
+                                            scopingcall_sched_date = scopingcall_sched_date,
+                                            scopingcall_comp_date = scopingcall_comp_date,
+                                            tpp_sow_received_date = tpp_sow_received_date,
+                                            tpp_submit_date = tpp_submit_date, pp_complete_date = pp_complete_date,
+                                            approval1_date = approval1_date, approval2_date = approval2_date,
+                                            sow_reviewed_date = sow_reviewed_date, sow_to_cust_date = sow_to_cust_date,
+                                            cust_approved_date=cust_approved_date
+                                            )
+            db.session.add(implementation)
+            db.session.commit()
+            flash('Implementation Created.')
+            return render_template('home/opportunities/implementations.html',
+                                   add_implementation=False, form=form, title="Implementations")
+        except SQLAlchemyError as e:
+            print(form.errors.items)
+            flash('Error: details could not be created.')
+            error = str(e.__dict__['orig'])
+            flash(error)
+            # redirect to opportunities page
+            return redirect(url_for('home.list_opportunities'))
+
+    return render_template('home/opportunities/implementation.html', form=form,
+                           title="Implementation Details", data=implementation, id=id)
+
+@home.route('/opportunities/implementation/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_implementation(id):
+    """
+    Edit an implementation
+    """
+    check_admin()
+    add_implementation = False
+
+    implementation = Implementation.query.get_or_404(id)
+    form = OpportunityForm(obj=implementation)
+    if form.validate_on_submit():
+        id = form.id.data
+        oppid = form.oppid.data
+        flash('You are editing implementation ' + id + '.')
+        implementation.id = form.id.data
+        implementation.customername = form.customername.data
+        implementation.description = form.description.data
+        db.session.commit()
+        # redirect to the implementation page
+        return redirect(url_for('home.list_implementations'))
+
+    form.description.data = implementation.description
+    form.customername.data = implementation.customername
+    return render_template('home/opportunities/implementations.html', action="Edit",
+                           add_implementation=add_implementation, form=form, implementation=implementation,
+                           title="Edit Implementation")
+
+@home.route('/opportunities/implementation/delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+def delete_implementation(id):
+    """
+    Delete an implementation from the database
+    """
+    check_admin()
+    implementation = Implementation.query.get_or_404(id)
+    db.session.delete(implementation)
+    db.session.commit()
+    flash('You have successfully deleted the implementation.')
+
+    # redirect to the implementations page
+    return redirect(url_for('home.list_implementations'))
 
 @home.route('/dashboard')
 @login_required

@@ -80,7 +80,7 @@ def add_role():
         #redirect to roles page
         return redirect(url_for('admin.list_roles'))
     
-    return render_template('admin/roles/role.html', add_role=add_role, 
+    return render_template('/admin/roles/role.html', add_role=add_role,
     				form=form, title='Add Role')
 
 @admin.route('roles/edit/<int:id>', methods=['GET', 'POST'])

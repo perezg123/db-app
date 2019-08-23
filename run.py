@@ -3,7 +3,7 @@ import OpenSSL
 import ssl
 
 from app import create_app
-# from OpenSSL import SSL
+from OpenSSL import SSL
 
 # config_name = os.getenv('FLASK_CONFIG')
 config_name = 'development'
